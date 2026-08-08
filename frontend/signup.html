@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Son Chat</title>
+</head>
+<body>
+   <h1>signup</h1>
+   <input type="text" id="name" placeholder="name">
+   <input type="email" id="email" placeholder="email">
+   <input type="password" id="password" placeholder="password">
+   <button id="signup">signup</button>
+   <button id="login">login</button>
+   <h2 id="h2">Create an account or log into an existing one!</h2>
+<!--   <input type="password" id="confirm_password" placeholder="confirm password">-->
+
+   <script>
+       const name = document.getElementById("name");
+       const email = document.getElementById("email");
+       const password = document.getElementById("password");
+       const button = document.getElementById("signup");
+       const button1 = document.getElementById("login");
+       const h2 = document.getElementById("h2");
+
+   button.addEventListener('click', async function() {
+       const response = await fetch ('http://localhost:8000/signup', {
+           method: "POST",
+           headers: { 'content-type': 'application/json'},
+           body: JSON.stringify({
+               name: name.value,
+               email: email.value,
+               password: password.value
+           })
+       });
+       const data = await response.json();
+       if (data.status) {
+           window.location.href= "login.html";
+       } else {
+           h2.innerText = data.message
+       }
+   });
+
+   button1.addEventListener('click', ()=> {
+       window.location.href= "login.html";
+   });
+
+   </script>
+</body>
+</html>

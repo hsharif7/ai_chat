@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Chat</title>
+</head>
+<body>
+     <div id="list"></div>
+     <h1>AI Chat</h1>
+     <input type="text" id="prompt" placeholder="Ask me anything!">
+     <button id="send">Send</button>
+     <div id="output"></div>
+     <script>
+         let chatid = null
+         const guest = sessionStorage.getItem("guest") === "true";
+         const prompt = document.getElementById("prompt");
+         const button = document.getElementById("send");
+         const output = document.getElementById("output");
+
+     if (!guest)  {
+         async function show_chats() {
+         const response = await fetch ('http://localhost:8000/chats',{
+                 method: "GET",
+                 credentials: "include"
+             })
+
+         if (!response.ok) {
+             await fetch ('http://localhost:8000/refresh',{
+                 method: "GET",
+                 credentials: "include"
+             })
+         }
+
+         const chats = await response.json()
+         const container = document.getElementById("list");
+
+         function renderlist(chats) {
+             container.innerHTML = ""
+
+             chats.forEach(item => {
+                 const button = document.createElement("button")
+                 button.id = item.id;
+                 button.textContent = item.title;
+
+                 button.addEventListener('click', async function(){
+                     output.innerText = "";
+                     const response = await fetch (`http://localhost:8000/load?chat_id=${Number(button.id)}`,{
+                         method: "GET",
+                         credentials: "include",
+                     })
+                     chatid = button.id
+                     const messages = await response.json()
+                     console.log(messages);
+                     output.innerText += "\n"
+                     output.innerText += messages.join("\n\n");
+                 })
+
+
+                 container.appendChild(button);
+             })
+         }
+         renderlist(chats)
+     }
+     show_chats()
+     }
+
+     let links = []
+     button.addEventListener( 'click', async function() {
+         output.innerText += "\n\n"
+         output.innerText += prompt.value
+         output.innerText += "\n\n"
+         let response;
+         if (!guest) {
+             const url = chatid
+             ? `http://localhost:8000/ai?chat_id=${chatid}`
+             : 'http://localhost:8000/ai';
+         response = await fetch ( url,{
+             method: "POST",
+             credentials: "include",
+             headers: {'content-type': 'application/json'},
+             body: JSON.stringify({
+                 text: prompt.value
+             })
+         })
+
+         } else {
+             links.push({ "role": "user", "content": prompt.value})
+             response = await fetch ( 'http://localhost:8000/ai',{
+             method: "POST",
+             headers: {'content-type': 'application/json'},
+             body: JSON.stringify({
+                 text: prompt.value,
+                 links: links,
+             })
+         })
+         }
+
+         const reader = response.body.getReader();
+         const decoder = new TextDecoder();
+
+         let gr = ""
+         while (true) {
+             const {value, done} = await reader.read();
+
+             if (done) {
+                 break;
+             }
+
+             const chunk = decoder.decode(value);
+             output.innerText += chunk
+             if (guest) {
+                 gr += chunk
+             }
+         }
+         if (guest) {
+               links.push({ "role": "assistant", "content": gr})
+             }
+     })
+     </script>
+</body>
+</html>
