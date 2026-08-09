@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: ai-chat
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn ai:ai --host 0.0.0.0 --port $PORT
+
+    envVars:
+      - key: API_KEY
+        sync: false
+      - key: TOKEN_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: SIGNUP_API
+        sync: false
