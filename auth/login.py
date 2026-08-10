@@ -49,7 +49,9 @@ def login(data:Login, conn = Depends(db)):
             response.set_cookie(
                 key="refresh_token",
                 value=refresh_token,
-                httponly=True
+                httponly=True,
+                secure = True,
+                samesite = "none"
             )
             payload = {
                 "sub": str(row[0]),
@@ -64,7 +66,9 @@ def login(data:Login, conn = Depends(db)):
             response.set_cookie(
                 key="access_token",
                 value=access_token,
-                httponly=True
+                httponly=True,
+                secure=True,
+                samesite="none"
             )
 
             return response
