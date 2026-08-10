@@ -34,7 +34,9 @@
             })
             const data = await response.json()
             if (data.status) {
-                sessionStorage.setItem ("guest", false)
+                sessionStorage.setItem ("guest", false),
+                localStorage.setItem("access_token", data.access_token)
+                localStorage.setItem("refresh_token", data.refresh_token)
                 window.location.href = `chat.html`;
             } else{
                 h2.innerText = data.message

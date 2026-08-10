@@ -35,8 +35,6 @@ def login(data:Login, conn = Depends(db)):
     else:
         if hashp.verify(data.password, row[3]):
 
-            response = JSONResponse({"status": True})
-
             payload = {
                 "sub": str(row[0]),
                 "exp": now + timedelta(days=30),
@@ -45,13 +43,6 @@ def login(data:Login, conn = Depends(db)):
                 payload,
                 key,
                 algorithm=algo,
-            )
-            response.set_cookie(
-                key="refresh_token",
-                value=refresh_token,
-                httponly=True,
-                secure = True,
-                samesite = "none"
             )
             payload = {
                 "sub": str(row[0]),
@@ -63,14 +54,6 @@ def login(data:Login, conn = Depends(db)):
                 algorithm=algo,
             )
 
-            response.set_cookie(
-                key="access_token",
-                value=access_token,
-                httponly=True,
-                secure=True,
-                samesite="none"
-            )
-
-            return response
+            return JSONResponse({"status": True, "access_token": access_token, "refresh_token": refresh_token})
         else:
             return JSONResponse({"status": False, "message": "Incorrect password"})
