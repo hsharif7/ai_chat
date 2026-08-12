@@ -92,7 +92,7 @@
              links.push({ "role": "user", "content": prompt.value})
              response = await fetch ( 'https://ai-chat-yowc.onrender.com/ai',{
              method: "POST",
-             headers: {'content-type': 'application/json', Authorization: 'Bearer ' + atoken },
+             headers: {'content-type': 'application/json'},
              body: JSON.stringify({
                  text: prompt.value,
                  links: links,
